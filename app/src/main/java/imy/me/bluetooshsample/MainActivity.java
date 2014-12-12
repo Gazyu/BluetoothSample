@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -15,26 +17,45 @@ import java.util.Set;
 
 public class MainActivity extends ActionBarActivity {
 
+    private BluetoothClient mBluetoothClient = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         //Bluetoothが使えるかどうか
         if (bluetoothAdapter.equals(null) || !bluetoothAdapter.isEnabled()) {
             return;
         }
-        ArrayList<String> bluetoothDeviceNames = new ArrayList<>();
-        Set<BluetoothDevice> bluetoothDevices = bluetoothAdapter.getBondedDevices();
+        final ArrayList<String> bluetoothDeviceNames = new ArrayList<>();
+        final Set<BluetoothDevice> bluetoothDevices = bluetoothAdapter.getBondedDevices();
         for (BluetoothDevice bluetoothDevice : bluetoothDevices) {
             bluetoothDeviceNames.add(bluetoothDevice.getName());
         }
         ArrayAdapter<String> stringArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, bluetoothDeviceNames);
         ListView listView = (ListView) findViewById(R.id.bluetooth_list);
         listView.setAdapter(stringArrayAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String deviceName = bluetoothDeviceNames.get(position);
+                BluetoothClient bluetoothClient = new BluetoothClient(getApplicationContext(), deviceName);
+                bluetoothClient.connect();
+            }
+        });
     }
 
+    private void connectServer(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+            }
+        }).start();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
