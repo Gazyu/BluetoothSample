@@ -1,9 +1,16 @@
 package imy.me.bluetooshsample;
 
-import android.support.v7.app.ActionBarActivity;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+
+import java.util.ArrayList;
+import java.util.Set;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -12,6 +19,20 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        //Bluetoothが使えるかどうか
+        if (bluetoothAdapter.equals(null) || !bluetoothAdapter.isEnabled()) {
+            return;
+        }
+        ArrayList<String> bluetoothDeviceNames = new ArrayList<>();
+        Set<BluetoothDevice> bluetoothDevices = bluetoothAdapter.getBondedDevices();
+        for (BluetoothDevice bluetoothDevice : bluetoothDevices) {
+            bluetoothDeviceNames.add(bluetoothDevice.getName());
+        }
+        ArrayAdapter<String> stringArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, bluetoothDeviceNames);
+        ListView listView = (ListView) findViewById(R.id.bluetooth_list);
+        listView.setAdapter(stringArrayAdapter);
     }
 
 
