@@ -1,9 +1,19 @@
 package imy.me.bluetooshsample;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+
+import java.util.ArrayList;
+import java.util.Set;
 
 
 public class SelectConnectBluetoothDeviceActivity extends ActionBarActivity {
@@ -12,6 +22,33 @@ public class SelectConnectBluetoothDeviceActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_connect_bluetooth_device);
+
+
+        final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        //Bluetoothが使えるかどうか
+        if (bluetoothAdapter.equals(null) || !bluetoothAdapter.isEnabled()) {
+            return;
+        }
+        final ArrayList<String> bluetoothDeviceNames = new ArrayList<>();
+        final Set<BluetoothDevice> bluetoothDevices = bluetoothAdapter.getBondedDevices();
+        for (BluetoothDevice bluetoothDevice : bluetoothDevices) {
+            bluetoothDeviceNames.add(bluetoothDevice.getName());
+        }
+        ArrayAdapter<String> stringArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, bluetoothDeviceNames);
+        ListView listView = (ListView) findViewById(R.id.bluetooth_list);
+        listView.setAdapter(stringArrayAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String deviceName = bluetoothDeviceNames.get(position);
+                Intent intent = new Intent(SelectConnectBluetoothDeviceActivity.this, MessageActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putInt(MessageActivity.RECEIVE_KEY_MODE, MessageActivity.MODE_CLIENT);
+                bundle.putString(MessageActivity.RECEIVE_KEY_SERVER_NAME, deviceName);
+                intent.putExtras(bundle);
+                startActivity(intent);
+            }
+        });
     }
 
 

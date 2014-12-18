@@ -6,69 +6,59 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Set;
 import java.util.UUID;
 
 /**
- * Created by kuwata on 14/12/12.
+ * Created by k.k.base on 14/12/12.
  */
-public class BluetoothClient {
+public class BluetoothClient implements BluetoothMethods {
     public static final UUID SPP_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
-    private BluetoothSocket bluetoothSocket = null;
-    private BluetoothDevice bluetoothDevice = null;
-
-    private InputStream in;
-    private OutputStream out;
+    private BluetoothSocket mBluetoothSocket = null;
+    private BluetoothDevice mBluetoothDevice = null;
 
     private Context mContext;
-    static BluetoothAdapter myClientAdapter;
+    private BluetoothAdapter mBluetoothAdapter;
+    private BluetoothServer.BluetoothEvent mBluetoothEvent;
 
-    public BluetoothClient(Context context, String pcName) {
+    public BluetoothClient(Context context, String pcName, BluetoothServer.BluetoothEvent bluetoothEvent) {
         mContext = context;
-        myClientAdapter = BluetoothAdapter.getDefaultAdapter();
-        Set<BluetoothDevice> pairedDevices = myClientAdapter.getBondedDevices();
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
         for (BluetoothDevice device : pairedDevices) {
             if (device.getName().equals(pcName)) {
-                bluetoothDevice = device;
+                mBluetoothDevice = device;
                 break;
             }
         }
-        if (bluetoothDevice == null) {
+        if (mBluetoothDevice == null) {
             return;
         }
 
-        BluetoothSocket tmpSock = null;
         try {
-            tmpSock = bluetoothDevice.createRfcommSocketToServiceRecord(SPP_UUID);
+            mBluetoothSocket = mBluetoothDevice.createRfcommSocketToServiceRecord(SPP_UUID);
         } catch (IOException e) {
-            e.printStackTrace();
+            return;
         }
-        bluetoothSocket = tmpSock;
-    }
-
-    public void connect() {
-        try {
-            bluetoothSocket.connect();
-            in = bluetoothSocket.getInputStream();
-            out = bluetoothSocket.getOutputStream();
-        } catch (IOException e) {
-            try {
-                bluetoothSocket.close();
-            } catch (IOException closeException) {
-                e.printStackTrace();
+        mBluetoothEvent = bluetoothEvent;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mBluetoothSocket.connect();
+                    mBluetoothEvent.onConnected(mBluetoothSocket);
+                } catch (IOException e) {
+                }
             }
-            return;
-        }
-
+        }).start();
     }
-    public void write(byte[] buf){
+
+    @Override
+    public void disconnect() {
         try {
-            out.write(buf);
+            mBluetoothSocket.close();
         } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 }

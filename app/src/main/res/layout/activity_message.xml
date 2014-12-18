@@ -9,13 +9,11 @@
               android:paddingTop="@dimen/activity_vertical_margin"
               tools:context="imy.me.bluetooshsample.MessageActivity">
 
-    <TextView
-        android:id="@+id/log"
+    <ListView
+        android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="#E0E0E0"
-        android:textSize="18dp"/>
+        android:layout_weight="1"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -31,8 +29,8 @@
         <Button
             android:id="@+id/send_button"
             android:layout_width="48dp"
-            android:background="#90D7EC"
             android:layout_height="match_parent"
+            android:background="#90D7EC"
             android:text="Go"/>
     </LinearLayout>
 

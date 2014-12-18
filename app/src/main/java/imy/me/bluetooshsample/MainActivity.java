@@ -1,61 +1,39 @@
 package imy.me.bluetooshsample;
 
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-
-import java.util.ArrayList;
-import java.util.Set;
 
 
 public class MainActivity extends ActionBarActivity {
-
-    private BluetoothClient mBluetoothClient = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        //Bluetoothが使えるかどうか
-        if (bluetoothAdapter.equals(null) || !bluetoothAdapter.isEnabled()) {
-            return;
-        }
-        final ArrayList<String> bluetoothDeviceNames = new ArrayList<>();
-        final Set<BluetoothDevice> bluetoothDevices = bluetoothAdapter.getBondedDevices();
-        for (BluetoothDevice bluetoothDevice : bluetoothDevices) {
-            bluetoothDeviceNames.add(bluetoothDevice.getName());
-        }
-        ArrayAdapter<String> stringArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, bluetoothDeviceNames);
-        ListView listView = (ListView) findViewById(R.id.bluetooth_list);
-        listView.setAdapter(stringArrayAdapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        findViewById(R.id.wait_connect).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String deviceName = bluetoothDeviceNames.get(position);
-                BluetoothClient bluetoothClient = new BluetoothClient(getApplicationContext(), deviceName);
-                bluetoothClient.connect();
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, MessageActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putInt(MessageActivity.RECEIVE_KEY_MODE, MessageActivity.MODE_SERVER);
+                intent.putExtras(bundle);
+                startActivity(intent);
+            }
+        });
+        findViewById(R.id.connect_server).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, SelectConnectBluetoothDeviceActivity.class);
+                startActivity(intent);
             }
         });
     }
 
-    private void connectServer(){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-            }
-        }).start();
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
